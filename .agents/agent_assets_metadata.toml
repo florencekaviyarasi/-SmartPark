@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "8yg3mSWbUpPsngPoU8Uoc"
+uri = "file://PROJECT_CONTEXT.md"
+type = "text"
+title = "SmartPark — Project Handoff Document"
