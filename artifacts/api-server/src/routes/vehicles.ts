@@ -23,8 +23,8 @@ async function getConfig() {
 function calculateFee(entryTime: Date, exitTime: Date, baseRate: number, additionalHourlyRate: number): number {
   const durationMs = exitTime.getTime() - entryTime.getTime();
   const durationHours = durationMs / (1000 * 60 * 60);
-  if (durationHours <= 1) return baseRate;
-  return baseRate + Math.ceil(durationHours - 1) * additionalHourlyRate;
+  const raw = durationHours <= 1 ? baseRate : baseRate + Math.ceil(durationHours - 1) * additionalHourlyRate;
+  return Math.ceil(raw);
 }
 
 router.post("/vehicles/entry", async (req, res): Promise<void> => {
