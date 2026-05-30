@@ -3,20 +3,31 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Smart Parking Management System API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
+  - name: slots
+    description: Parking slot management
+  - name: vehicles
+    description: Vehicle entry/exit
+  - name: transactions
+    description: Parking transactions
+  - name: dashboard
+    description: Dashboard statistics
+  - name: reports
+    description: Reports
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +35,431 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout user
+      responses:
+        "200":
+          description: Logged out
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Not authenticated
+
+  /slots:
+    get:
+      operationId: listSlots
+      tags: [slots]
+      summary: List all parking slots
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [available, occupied]
+        - in: query
+          name: type
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of slots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ParkingSlot"
+    post:
+      operationId: createSlot
+      tags: [slots]
+      summary: Create a new parking slot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SlotInput"
+      responses:
+        "201":
+          description: Slot created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParkingSlot"
+
+  /slots/{id}:
+    get:
+      operationId: getSlot
+      tags: [slots]
+      summary: Get a slot by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Slot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParkingSlot"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateSlot
+      tags: [slots]
+      summary: Update a parking slot
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SlotUpdate"
+      responses:
+        "200":
+          description: Updated slot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParkingSlot"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteSlot
+      tags: [slots]
+      summary: Delete a parking slot
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /vehicles/entry:
+    post:
+      operationId: vehicleEntry
+      tags: [vehicles]
+      summary: Register vehicle entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VehicleEntryInput"
+      responses:
+        "201":
+          description: Vehicle entry registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VehicleEntry"
+        "400":
+          description: No available slots or invalid input
+
+  /vehicles/exit:
+    post:
+      operationId: vehicleExit
+      tags: [vehicles]
+      summary: Register vehicle exit and calculate fee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VehicleExitInput"
+      responses:
+        "200":
+          description: Vehicle exit registered with fee calculation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParkingTransaction"
+        "404":
+          description: Vehicle not found
+
+  /vehicles/active:
+    get:
+      operationId: listActiveVehicles
+      tags: [vehicles]
+      summary: List currently parked vehicles
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Active vehicles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VehicleEntry"
+
+  /vehicles/search:
+    get:
+      operationId: searchVehicle
+      tags: [vehicles]
+      summary: Search vehicle by number
+      parameters:
+        - in: query
+          name: vehicleNumber
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Vehicle entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VehicleEntry"
+        "404":
+          description: Not found
+
+  /transactions:
+    get:
+      operationId: listTransactions
+      tags: [transactions]
+      summary: List parking transactions (history)
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+        - in: query
+          name: startDate
+          schema:
+            type: string
+        - in: query
+          name: endDate
+          schema:
+            type: string
+        - in: query
+          name: limit
+          schema:
+            type: integer
+        - in: query
+          name: offset
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Transaction list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ParkingTransaction"
+
+  /transactions/{id}:
+    get:
+      operationId: getTransaction
+      tags: [transactions]
+      summary: Get transaction by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Transaction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParkingTransaction"
+        "404":
+          description: Not found
+
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Get dashboard summary statistics
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/occupancy-chart:
+    get:
+      operationId: getOccupancyChart
+      tags: [dashboard]
+      summary: Get hourly occupancy data for chart
+      parameters:
+        - in: query
+          name: date
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Occupancy chart data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OccupancyDataPoint"
+
+  /dashboard/revenue-chart:
+    get:
+      operationId: getRevenueChart
+      tags: [dashboard]
+      summary: Get daily revenue data for chart
+      parameters:
+        - in: query
+          name: period
+          schema:
+            type: string
+            enum: [week, month]
+      responses:
+        "200":
+          description: Revenue chart data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RevenueDataPoint"
+
+  /reports/daily:
+    get:
+      operationId: getDailyReport
+      tags: [reports]
+      summary: Get daily report
+      parameters:
+        - in: query
+          name: date
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Daily report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+
+  /reports/weekly:
+    get:
+      operationId: getWeeklyReport
+      tags: [reports]
+      summary: Get weekly report
+      parameters:
+        - in: query
+          name: startDate
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Weekly report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+
+  /reports/monthly:
+    get:
+      operationId: getMonthlyReport
+      tags: [reports]
+      summary: Get monthly report
+      parameters:
+        - in: query
+          name: month
+          schema:
+            type: integer
+        - in: query
+          name: year
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Monthly report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+
+  /reports/export:
+    get:
+      operationId: exportReport
+      tags: [reports]
+      summary: Export report data as CSV
+      parameters:
+        - in: query
+          name: type
+          required: true
+          schema:
+            type: string
+            enum: [daily, weekly, monthly]
+        - in: query
+          name: date
+          schema:
+            type: string
+      responses:
+        "200":
+          description: CSV data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportData"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +470,198 @@ components:
       required:
         - status
 
+    LoginInput:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      required: [user]
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+
+    User:
+      type: object
+      required: [id, username, role]
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        role:
+          type: string
+          enum: [admin, staff]
+
+    ParkingSlot:
+      type: object
+      required: [id, slotNumber, slotType, status]
+      properties:
+        id:
+          type: integer
+        slotNumber:
+          type: string
+        slotType:
+          type: string
+          enum: [car, bike, truck]
+        status:
+          type: string
+          enum: [available, occupied]
+        createdAt:
+          type: string
+
+    SlotInput:
+      type: object
+      required: [slotNumber, slotType]
+      properties:
+        slotNumber:
+          type: string
+        slotType:
+          type: string
+          enum: [car, bike, truck]
+
+    SlotUpdate:
+      type: object
+      properties:
+        slotNumber:
+          type: string
+        slotType:
+          type: string
+          enum: [car, bike, truck]
+        status:
+          type: string
+          enum: [available, occupied]
+
+    VehicleEntry:
+      type: object
+      required: [id, vehicleNumber, ownerName, vehicleType, slotId, entryTime]
+      properties:
+        id:
+          type: integer
+        vehicleNumber:
+          type: string
+        ownerName:
+          type: string
+        vehicleType:
+          type: string
+          enum: [car, bike, truck]
+        slotId:
+          type: integer
+        slotNumber:
+          type: ["string", "null"]
+        entryTime:
+          type: string
+
+    VehicleEntryInput:
+      type: object
+      required: [vehicleNumber, ownerName, vehicleType]
+      properties:
+        vehicleNumber:
+          type: string
+        ownerName:
+          type: string
+        vehicleType:
+          type: string
+          enum: [car, bike, truck]
+
+    VehicleExitInput:
+      type: object
+      required: [vehicleNumber]
+      properties:
+        vehicleNumber:
+          type: string
+
+    ParkingTransaction:
+      type: object
+      required: [id, vehicleNumber, slotId, entryTime, exitTime, durationMinutes, fee]
+      properties:
+        id:
+          type: integer
+        vehicleNumber:
+          type: string
+        ownerName:
+          type: ["string", "null"]
+        vehicleType:
+          type: ["string", "null"]
+        slotId:
+          type: integer
+        slotNumber:
+          type: ["string", "null"]
+        entryTime:
+          type: string
+        exitTime:
+          type: string
+        durationMinutes:
+          type: integer
+        fee:
+          type: number
+
+    DashboardStats:
+      type: object
+      required: [totalSlots, availableSlots, occupiedSlots, todayRevenue, todayVehicles, occupancyRate]
+      properties:
+        totalSlots:
+          type: integer
+        availableSlots:
+          type: integer
+        occupiedSlots:
+          type: integer
+        todayRevenue:
+          type: number
+        todayVehicles:
+          type: integer
+        occupancyRate:
+          type: number
+        weekRevenue:
+          type: number
+        monthRevenue:
+          type: number
+
+    OccupancyDataPoint:
+      type: object
+      required: [hour, count]
+      properties:
+        hour:
+          type: string
+        count:
+          type: integer
+
+    RevenueDataPoint:
+      type: object
+      required: [date, revenue]
+      properties:
+        date:
+          type: string
+        revenue:
+          type: number
+
+    Report:
+      type: object
+      required: [period, totalVehicles, totalRevenue, transactions]
+      properties:
+        period:
+          type: string
+        totalVehicles:
+          type: integer
+        totalRevenue:
+          type: number
+        averageFee:
+          type: number
+        transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ParkingTransaction"
+
+    ExportData:
+      type: object
+      required: [csv, filename]
+      properties:
+        csv:
+          type: string
+        filename:
+          type: string

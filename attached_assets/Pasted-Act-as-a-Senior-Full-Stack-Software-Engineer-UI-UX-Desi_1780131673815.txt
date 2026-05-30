@@ -1,0 +1,351 @@
+Act as a Senior Full Stack Software Engineer, UI/UX Designer, and System Architect.
+
+Build a complete Smart Parking Management System using only:
+
+Python (Flask)
+HTML5
+CSS3
+JavaScript (Vanilla JS only)
+SQLite Database
+Bootstrap 5 (optional for responsiveness)
+
+The project should be suitable for a college mini project and easy for beginners to understand and modify.
+
+PROJECT TITLE
+
+Smart Parking Management System
+
+PROJECT OBJECTIVE
+
+Develop a web-based parking management system that allows vehicle owners and parking administrators to efficiently manage parking slots.
+
+The system should:
+
+Track parking slot availability
+Allow vehicle entry and exit
+Calculate parking fees automatically
+Maintain parking history
+Provide an attractive modern dashboard
+Be responsive on desktop and mobile devices
+UI/UX REQUIREMENTS
+
+I want the UI to look like a modern startup product.
+
+Design inspiration:
+
+Tesla Dashboard
+Notion
+Stripe
+Google Material Design
+
+Use:
+
+Glassmorphism effects
+Soft shadows
+Smooth animations
+Rounded corners
+Modern cards
+Gradient accents
+Clean typography
+Dark mode and Light mode toggle
+
+Color Palette:
+
+Primary:
+
+#2563EB
+
+Secondary:
+
+#06B6D4
+
+Success:
+
+#22C55E
+
+Danger:
+
+#EF4444
+
+Background:
+
+#F8FAFC
+
+Dark Mode:
+
+#0F172A
+
+Typography:
+
+Poppins
+Inter
+
+Create:
+
+Login Page
+Dashboard
+Parking Slot Page
+Vehicle Entry Page
+Vehicle Exit Page
+Parking History Page
+Reports Page
+Settings Page
+
+Include:
+
+Sidebar Navigation
+Top Navbar
+Animated Statistics Cards
+Charts
+Search Bar
+Responsive Tables
+Loading Animations
+Toast Notifications
+USER ROLES
+Admin
+
+Can:
+
+Add parking slots
+Delete parking slots
+View all vehicles
+View reports
+View revenue
+View parking history
+Manage system
+Parking Staff
+
+Can:
+
+Register vehicle entry
+Register vehicle exit
+View slot availability
+MODULES
+Module 1 – Authentication
+
+Features:
+
+Login
+Logout
+Session Management
+
+Database:
+
+Users
+
+id
+username
+password
+role
+Module 2 – Parking Slot Management
+
+Features:
+
+Add slot
+Edit slot
+Delete slot
+View slot status
+
+Status:
+
+Available
+Occupied
+
+Database:
+
+ParkingSlots
+
+slot_id
+slot_number
+slot_type
+status
+Module 3 – Vehicle Entry
+
+Features:
+
+Vehicle Number
+Owner Name
+Vehicle Type
+Entry Time
+
+Automatically:
+
+Allocate nearest available slot
+
+Database:
+
+VehicleEntries
+
+id
+vehicle_number
+owner_name
+vehicle_type
+slot_id
+entry_time
+Module 4 – Vehicle Exit
+
+Features:
+
+Search vehicle
+Exit vehicle
+Calculate fee
+
+Formula:
+
+First hour = ₹20
+
+Every additional hour = ₹10
+
+Display:
+
+Entry Time
+Exit Time
+Duration
+Fee
+
+Database:
+
+ParkingTransactions
+
+id
+vehicle_number
+slot_id
+entry_time
+exit_time
+duration
+fee
+Module 5 – Dashboard
+
+Show:
+
+Total Slots
+
+Available Slots
+
+Occupied Slots
+
+Today's Revenue
+
+Today's Vehicles
+
+Parking Occupancy Rate
+
+Use beautiful cards and charts.
+
+Module 6 – Reports
+
+Generate:
+
+Daily Report
+
+Weekly Report
+
+Monthly Report
+
+Revenue Report
+
+Export:
+
+CSV
+DATABASE DESIGN
+
+Provide:
+
+ER Diagram
+Relational Schema
+SQL Table Creation Scripts
+Foreign Key Relationships
+FOLDER STRUCTURE
+
+Generate proper project structure:
+
+ParkingManagementSystem/
+│
+├── app.py
+├── database.db
+│
+├── static/
+│   ├── css/
+│   │   └── style.css
+│   │
+│   ├── js/
+│   │   └── script.js
+│   │
+│   └── images/
+│
+├── templates/
+│   ├── login.html
+│   ├── dashboard.html
+│   ├── slots.html
+│   ├── vehicle_entry.html
+│   ├── vehicle_exit.html
+│   ├── history.html
+│   ├── reports.html
+│   └── layout.html
+│
+└── database/
+    └── schema.sql
+CODING REQUIREMENTS
+
+Generate:
+
+Complete Flask backend
+Complete SQLite integration
+HTML templates
+CSS styling
+JavaScript interactions
+SQL scripts
+
+Code should be:
+
+Well-commented
+Beginner-friendly
+Modular
+Easy to explain during viva
+EXTRA FEATURES
+
+Add:
+
+QR Code based parking ticket generation
+Search vehicle instantly
+Auto slot assignment
+Dark Mode toggle
+Revenue chart
+Occupancy chart
+Real-time slot count
+Toast notifications
+Confirmation dialogs
+DOCUMENTATION
+
+Generate:
+
+Problem Statement
+Objectives
+Scope
+Functional Requirements
+Non-Functional Requirements
+Use Case Diagram
+Class Diagram
+Activity Diagram
+Sequence Diagram
+ER Diagram
+Database Design
+Testing Cases
+Future Enhancements
+OUTPUT FORMAT
+
+Provide the project in the following order:
+
+System Architecture
+Database Design
+Folder Structure
+SQL Scripts
+Flask Backend Code
+HTML Files
+CSS Files
+JavaScript Files
+UML Diagrams (PlantUML format)
+Testing Cases
+Viva Questions and Answers
+
+Generate production-quality code with modern UI/UX and ensure everything works together without errors.
