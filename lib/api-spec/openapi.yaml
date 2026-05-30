@@ -81,6 +81,42 @@ paths:
         "401":
           description: Not authenticated
 
+  /config:
+    get:
+      operationId: getConfig
+      tags: [config]
+      summary: Get parking lot configuration
+      responses:
+        "200":
+          description: Configuration exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParkingConfig"
+        "404":
+          description: Not configured yet
+
+  /config/setup:
+    post:
+      operationId: setupConfig
+      tags: [config]
+      summary: Initial setup - configure parking lot and generate 30 slots
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetupInput"
+      responses:
+        "201":
+          description: Setup complete
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParkingConfig"
+        "400":
+          description: Already configured
+
   /slots:
     get:
       operationId: listSlots
@@ -497,6 +533,44 @@ components:
         role:
           type: string
           enum: [admin, staff]
+
+    ParkingConfig:
+      type: object
+      required: [id, lotName, totalFloors, slotsPerFloor, vehicleTypes, baseRate, additionalHourlyRate]
+      properties:
+        id:
+          type: integer
+        lotName:
+          type: string
+        totalFloors:
+          type: integer
+        slotsPerFloor:
+          type: integer
+        vehicleTypes:
+          type: array
+          items:
+            type: string
+        baseRate:
+          type: number
+        additionalHourlyRate:
+          type: number
+        createdAt:
+          type: string
+
+    SetupInput:
+      type: object
+      required: [lotName, vehicleTypes, baseRate, additionalHourlyRate]
+      properties:
+        lotName:
+          type: string
+        vehicleTypes:
+          type: array
+          items:
+            type: string
+        baseRate:
+          type: number
+        additionalHourlyRate:
+          type: number
 
     ParkingSlot:
       type: object

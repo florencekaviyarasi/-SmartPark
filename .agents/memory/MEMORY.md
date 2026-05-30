@@ -1,0 +1,3 @@
+- [First-run setup flow](first-run-setup.md) — config 404 → redirect to /setup; ProtectedRoute checks useGetConfig with retry:false to trigger redirect
+- [Fee calculation](fee-calc.md) — vehicles exit route reads baseRate + additionalHourlyRate from parking_config table at exit time; never hardcoded
+- [Slot generation](slot-generation.md) — POST /api/config/setup creates 30 slots A1-A10, B1-B10, C1-C10; slotType cycles through vehicleTypes array

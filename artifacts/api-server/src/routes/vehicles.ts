@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { db, vehicleEntriesTable, parkingSlotsTable } from "@workspace/db";
-import { eq, and, like, or } from "drizzle-orm";
+import { db, vehicleEntriesTable, parkingSlotsTable, parkingConfigTable } from "@workspace/db";
+import { eq, and } from "drizzle-orm";
 import {
   VehicleEntryBody,
   VehicleExitBody,
@@ -11,11 +11,20 @@ import { parkingTransactionsTable } from "@workspace/db";
 
 const router: IRouter = Router();
 
-function calculateFee(entryTime: Date, exitTime: Date): number {
+async function getConfig() {
+  const configs = await db.select().from(parkingConfigTable).limit(1);
+  if (configs.length === 0) return { baseRate: 20, additionalHourlyRate: 10 };
+  return {
+    baseRate: parseFloat(String(configs[0].baseRate)),
+    additionalHourlyRate: parseFloat(String(configs[0].additionalHourlyRate)),
+  };
+}
+
+function calculateFee(entryTime: Date, exitTime: Date, baseRate: number, additionalHourlyRate: number): number {
   const durationMs = exitTime.getTime() - entryTime.getTime();
   const durationHours = durationMs / (1000 * 60 * 60);
-  if (durationHours <= 1) return 20;
-  return 20 + Math.ceil(durationHours - 1) * 10;
+  if (durationHours <= 1) return baseRate;
+  return baseRate + Math.ceil(durationHours - 1) * additionalHourlyRate;
 }
 
 router.post("/vehicles/entry", async (req, res): Promise<void> => {
@@ -37,29 +46,24 @@ router.post("/vehicles/entry", async (req, res): Promise<void> => {
     return;
   }
 
-  const availableSlots = await db
+  // Try matching vehicle type first, then fall back to any available slot
+  let availableSlots = await db
     .select()
     .from(parkingSlotsTable)
-    .where(
-      and(
-        eq(parkingSlotsTable.status, "available"),
-        eq(parkingSlotsTable.slotType, vehicleType),
-      ),
-    )
+    .where(and(eq(parkingSlotsTable.status, "available"), eq(parkingSlotsTable.slotType, vehicleType)))
     .limit(1);
 
   if (availableSlots.length === 0) {
-    const anySlot = await db
+    availableSlots = await db
       .select()
       .from(parkingSlotsTable)
       .where(eq(parkingSlotsTable.status, "available"))
       .limit(1);
+  }
 
-    if (anySlot.length === 0) {
-      res.status(400).json({ error: "No available parking slots" });
-      return;
-    }
-    availableSlots.push(anySlot[0]);
+  if (availableSlots.length === 0) {
+    res.status(400).json({ error: "No available parking slots" });
+    return;
   }
 
   const slot = availableSlots[0];
@@ -110,8 +114,10 @@ router.post("/vehicles/exit", async (req, res): Promise<void> => {
 
   const exitTime = new Date();
   const durationMs = exitTime.getTime() - entry.entryTime.getTime();
-  const durationMinutes = Math.ceil(durationMs / (1000 * 60));
-  const fee = calculateFee(entry.entryTime, exitTime);
+  const durationMinutes = Math.max(1, Math.ceil(durationMs / (1000 * 60)));
+
+  const { baseRate, additionalHourlyRate } = await getConfig();
+  const fee = calculateFee(entry.entryTime, exitTime, baseRate, additionalHourlyRate);
 
   const [slot] = await db.select().from(parkingSlotsTable).where(eq(parkingSlotsTable.id, entry.slotId));
 
@@ -173,12 +179,7 @@ router.get("/vehicles/active", async (req, res): Promise<void> => {
       )
     : entries;
 
-  res.json(
-    filtered.map((e) => ({
-      ...e,
-      entryTime: e.entryTime.toISOString(),
-    })),
-  );
+  res.json(filtered.map((e) => ({ ...e, entryTime: e.entryTime.toISOString() })));
 });
 
 router.get("/vehicles/search", async (req, res): Promise<void> => {

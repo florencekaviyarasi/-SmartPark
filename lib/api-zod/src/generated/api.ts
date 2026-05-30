@@ -44,6 +44,32 @@ export const GetMeResponse = zod.object({
 
 
 /**
+ * @summary Get parking lot configuration
+ */
+export const GetConfigResponse = zod.object({
+  "id": zod.number(),
+  "lotName": zod.string(),
+  "totalFloors": zod.number(),
+  "slotsPerFloor": zod.number(),
+  "vehicleTypes": zod.array(zod.string()),
+  "baseRate": zod.number(),
+  "additionalHourlyRate": zod.number(),
+  "createdAt": zod.string().optional()
+})
+
+
+/**
+ * @summary Initial setup - configure parking lot and generate 30 slots
+ */
+export const SetupConfigBody = zod.object({
+  "lotName": zod.string(),
+  "vehicleTypes": zod.array(zod.string()),
+  "baseRate": zod.number(),
+  "additionalHourlyRate": zod.number()
+})
+
+
+/**
  * @summary List all parking slots
  */
 export const ListSlotsQueryParams = zod.object({

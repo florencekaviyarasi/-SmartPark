@@ -35,11 +35,13 @@ import type {
   ListTransactionsParams,
   LoginInput,
   OccupancyDataPoint,
+  ParkingConfig,
   ParkingSlot,
   ParkingTransaction,
   Report,
   RevenueDataPoint,
   SearchVehicleParams,
+  SetupInput,
   SlotInput,
   SlotUpdate,
   User,
@@ -354,6 +356,154 @@ export function useGetMe<TData = Awaited<ReturnType<typeof getMe>>, TError = Err
 
 
 
+
+export const getGetConfigUrl = () => {
+
+
+
+
+  return `/api/config`
+}
+
+/**
+ * @summary Get parking lot configuration
+ */
+export const getConfig = async ( options?: RequestInit): Promise<ParkingConfig> => {
+
+  return customFetch<ParkingConfig>(getGetConfigUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetConfigQueryKey = () => {
+    return [
+    `/api/config`
+    ] as const;
+    }
+
+
+export const getGetConfigQueryOptions = <TData = Awaited<ReturnType<typeof getConfig>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConfig>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetConfigQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getConfig>>> = ({ signal }) => getConfig({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getConfig>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetConfigQueryResult = NonNullable<Awaited<ReturnType<typeof getConfig>>>
+export type GetConfigQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get parking lot configuration
+ */
+
+export function useGetConfig<TData = Awaited<ReturnType<typeof getConfig>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConfig>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetConfigQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getSetupConfigUrl = () => {
+
+
+
+
+  return `/api/config/setup`
+}
+
+/**
+ * @summary Initial setup - configure parking lot and generate 30 slots
+ */
+export const setupConfig = async (setupInput: SetupInput, options?: RequestInit): Promise<ParkingConfig> => {
+
+  return customFetch<ParkingConfig>(getSetupConfigUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      setupInput,)
+  }
+);}
+
+
+
+
+export const getSetupConfigMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setupConfig>>, TError,{data: BodyType<SetupInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof setupConfig>>, TError,{data: BodyType<SetupInput>}, TContext> => {
+
+const mutationKey = ['setupConfig'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setupConfig>>, {data: BodyType<SetupInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  setupConfig(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetupConfigMutationResult = NonNullable<Awaited<ReturnType<typeof setupConfig>>>
+    export type SetupConfigMutationBody = BodyType<SetupInput>
+    export type SetupConfigMutationError = ErrorType<void>
+
+    /**
+ * @summary Initial setup - configure parking lot and generate 30 slots
+ */
+export const useSetupConfig = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setupConfig>>, TError,{data: BodyType<SetupInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof setupConfig>>,
+        TError,
+        {data: BodyType<SetupInput>},
+        TContext
+      > => {
+      return useMutation(getSetupConfigMutationOptions(options));
+    }
 
 export const getListSlotsUrl = (params?: ListSlotsParams,) => {
   const normalizedParams = new URLSearchParams();

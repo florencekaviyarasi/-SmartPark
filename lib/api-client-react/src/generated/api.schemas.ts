@@ -32,6 +32,24 @@ export interface AuthResponse {
   user: User;
 }
 
+export interface ParkingConfig {
+  id: number;
+  lotName: string;
+  totalFloors: number;
+  slotsPerFloor: number;
+  vehicleTypes: string[];
+  baseRate: number;
+  additionalHourlyRate: number;
+  createdAt?: string;
+}
+
+export interface SetupInput {
+  lotName: string;
+  vehicleTypes: string[];
+  baseRate: number;
+  additionalHourlyRate: number;
+}
+
 export type ParkingSlotSlotType = typeof ParkingSlotSlotType[keyof typeof ParkingSlotSlotType];
 
 
